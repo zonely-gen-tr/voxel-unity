@@ -1,0 +1,79 @@
+name: Zonely Voxel Engine · Unity WebGL Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'Assets/**'
+      - 'Packages/**'
+      - 'ProjectSettings/**'
+      - 'tools/**'
+      - '.github/workflows/webgl-build.yml'
+
+jobs:
+  build-webgl:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check Unity license secret
+        id: unity_license
+        shell: bash
+        env:
+          UNITY_LICENSE_VALUE: ${{ secrets.UNITY_LICENSE }}
+        run: |
+          if [ -n "$UNITY_LICENSE_VALUE" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+            echo "Unity license secret bulundu. Build devam edecek."
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::UNITY_LICENSE secret henüz yok. Repo kurulumu tamamlandı; lisans eklenince workflow tekrar çalıştırılabilir."
+          fi
+
+      - name: Cache Unity Library
+        if: steps.unity_license.outputs.ready == 'true'
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-WebGL-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-WebGL-
+            Library-
+
+      - name: Build Unity WebGL
+        if: steps.unity_license.outputs.ready == 'true'
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+        with:
+          targetPlatform: WebGL
+          unityVersion: auto
+          buildMethod: ZonelyVoxelEngine.Editor.CIBuilder.Build
+
+      - name: Pack build into one HTML
+        if: steps.unity_license.outputs.ready == 'true'
+        run: node tools/pack-unity-single-html.mjs build/WebGL build/Single/zonely-voxel-engine.html
+
+      - name: Upload single HTML
+        if: steps.unity_license.outputs.ready == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: zonely-voxel-engine-single-html
+          path: build/Single/zonely-voxel-engine.html
+          if-no-files-found: error
+
+      - name: Upload raw WebGL build
+        if: steps.unity_license.outputs.ready == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: zonely-voxel-engine-webgl
+          path: build/WebGL
+          if-no-files-found: error
