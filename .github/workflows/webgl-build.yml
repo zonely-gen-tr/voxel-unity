@@ -60,14 +60,14 @@ jobs:
 
       - name: Pack build into one HTML
         if: steps.unity_license.outputs.ready == 'true'
-        run: node tools/pack-unity-single-html.mjs build/WebGL build/Single/zonely-voxel-engine.html
-
+        run: node tools/pack-unity-single-html.mjs build/WebGL single/zonely-voxel-engine.html
+      
       - name: Upload single HTML
         if: steps.unity_license.outputs.ready == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: zonely-voxel-engine-single-html
-          path: build/Single/zonely-voxel-engine.html
+          path: single/zonely-voxel-engine.html
           if-no-files-found: error
 
       - name: Upload raw WebGL build
