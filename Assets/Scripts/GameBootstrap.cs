@@ -46,7 +46,19 @@ namespace ZonelyVoxelEngine
 
         Material Mat(Color c)
         {
-            var shader = Shader.Find("Standard");
+            // Resources altındaki shader build'de kesin tutulur.
+            var shader = Resources.Load<Shader>("ZonelyColor");
+
+            // Editor/debug fallback.
+            if (shader == null)
+                shader = Shader.Find("Unlit/Color");
+
+            if (shader == null)
+            {
+                Debug.LogError("ZonelyColor shader yüklenemedi.");
+                return null;
+            }
+
             var m = new Material(shader);
             m.color = c;
             return m;
@@ -59,7 +71,11 @@ namespace ZonelyVoxelEngine
             g.transform.position = pos;
             g.transform.localScale = scale;
             if (parent) g.transform.SetParent(parent, true);
-            g.GetComponent<Renderer>().sharedMaterial = Mat(color);
+
+            var material = Mat(color);
+            if (material != null)
+                g.GetComponent<Renderer>().sharedMaterial = material;
+
             return g;
         }
 
@@ -86,9 +102,10 @@ namespace ZonelyVoxelEngine
             platform.name = "SpawnPlatform";
             platform.transform.position = new Vector3(0, .62f, 0);
             platform.transform.localScale = new Vector3(4.2f, .12f, 4.2f);
-            platform.GetComponent<Renderer>().sharedMaterial = Mat(new Color(.16f, .2f, .24f));
+            var platformMaterial = Mat(new Color(.16f, .2f, .24f));
+            if (platformMaterial != null)
+                platform.GetComponent<Renderer>().sharedMaterial = platformMaterial;
 
-            // Remote world gallery
             string[] gallery =
             {
                 "decor_chest", "decor_gold_chest", "decor_barrel", "decor_crates",
@@ -129,7 +146,10 @@ namespace ZonelyVoxelEngine
             fallback.transform.localPosition = new Vector3(0, .93f, 0);
             fallback.transform.localScale = new Vector3(.55f, .9f, .55f);
             Destroy(fallback.GetComponent<Collider>());
-            fallback.GetComponent<Renderer>().sharedMaterial = Mat(new Color(.17f, .3f, .42f));
+
+            var fallbackMaterial = Mat(new Color(.17f, .3f, .42f));
+            if (fallbackMaterial != null)
+                fallback.GetComponent<Renderer>().sharedMaterial = fallbackMaterial;
 
             var avatarRoot = new GameObject("AvatarRoot").transform;
             avatarRoot.SetParent(visualRoot, false);
@@ -213,9 +233,7 @@ namespace ZonelyVoxelEngine
 
             var obj = await RemoteGltfUtility.Load(d.url, transform, d.previewHeight, d.rotationOffset, true);
             if (obj != null)
-            {
                 transform.localScale = Vector3.one * .85f;
-            }
         }
     }
 }

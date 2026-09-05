@@ -43,8 +43,7 @@ const embedded = {
   mem: mem ? b64(mem) : null
 };
 
-const loaderJs = jsText(loader)
-  .replace(/<\/script/gi, "<\\/script");
+const loaderJs = jsText(loader).replace(/<\/script/gi, "<\\/script");
 
 const html = `<!doctype html>
 <html lang="tr">
@@ -99,7 +98,11 @@ const config={
   dataUrl:urls.dataUrl,
   frameworkUrl:urls.frameworkUrl,
   codeUrl:urls.codeUrl,
-  streamingAssetsUrl:"",
+
+  // Boş string file:// altında mevcut HTML adresine çözülüyordu.
+  // data:, gerçek bir dosya istemediğimiz için güvenli boş taban görevi görür.
+  streamingAssetsUrl:"data:,",
+
   companyName:"ZonelyVoxelEngine",
   productName:"Zonely Voxel Game Engine",
   productVersion:"0.1.0-dev"
