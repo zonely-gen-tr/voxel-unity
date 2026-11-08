@@ -1,8 +1,8 @@
 # Zonely Voxel Game Engine
 
-Zonely tarafından geliştirilen Unity 6 tabanlı, WebGL odaklı voxel oyun motoru ve geliştirici altyapısı.
+A Unity 6 voxel game engine and developer framework built by Zonely, with a focus on WebGL.
 
-> Bu repository motor geliştirme, runtime sistemleri, WebGL build otomasyonu ve geliştirici araçları içindir. Oyun/proje özelinde tanıtım veya son kullanıcı dokümantasyonu tutulmaz.
+> This repository covers engine development, runtime systems, WebGL build automation and developer tools. Project-specific marketing and end-user documentation are maintained separately.
 
 ## Engine Structure
 
